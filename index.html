@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Social Resume: The Intern Challenge</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+/* Layout: one fixed 1024×768 (4:3) game stage, letterboxed and scaled to fit any screen or projector */
+:root{
+  --world:#5b3fc4; --night:#2e1b5b; --cream:#fff4ea; --ink:#151c18; --coral:#c85745;
+  --yellow:#ffd964; --drop:#094466; --mint:#00c49c; --pink:#fc85ff; --muted:#574a73;
+  --lilac:#e8e1f5; --lilac2:#9d8fc0; --page:#1a1033; --white:#ffffff; --sky:#179cff;
+  --dim:#f3ece4; --dimtext:#4a4352; --dimline:#8f8697;
+  --f-pixel:'Press Start 2P','Courier New',monospace;
+  --f-ui:'Pixelify Sans','Trebuchet MS',sans-serif;
+  --f-body:'Nunito','Segoe UI',system-ui,sans-serif;
+  color-scheme:dark;
+}
+html{height:100%;box-sizing:border-box}
+body{height:100%;background:var(--page);color:var(--cream);font-family:var(--f-body)}
+*,*::before,*::after{box-sizing:border-box}
+#app{height:100%;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--page)}
+#app:fullscreen{padding:0}
+#vp{position:relative;width:100%;height:100%;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1024px;height:768px;transform:translate(-50%,-50%);transform-origin:center;overflow:hidden;
+  background:var(--world) url(assets/bg-stage.png) 0 0/100% 100% no-repeat;color:var(--ink);font-family:var(--f-body)}
+.pix{image-rendering:crisp-edges;image-rendering:pixelated}
+.n6{clip-path:polygon(0 12px,6px 12px,6px 6px,12px 6px,12px 0,calc(100% - 12px) 0,calc(100% - 12px) 6px,calc(100% - 6px) 6px,calc(100% - 6px) 12px,100% 12px,100% calc(100% - 12px),calc(100% - 6px) calc(100% - 12px),calc(100% - 6px) calc(100% - 6px),calc(100% - 12px) calc(100% - 6px),calc(100% - 12px) 100%,12px 100%,12px calc(100% - 6px),6px calc(100% - 6px),6px calc(100% - 12px),0 calc(100% - 12px))}
+.n4{clip-path:polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))}
+.hl{color:var(--yellow)}
+.decor{position:absolute}
+
+/* chrome */
+.topbar{position:absolute;left:48px;right:48px;top:18px;height:44px;display:flex;justify-content:space-between;align-items:center;z-index:7}
+.tb-left,.tb-right{display:flex;gap:12px;align-items:center}
+.chip{background:rgba(46,27,91,.65);color:var(--cream);padding:8px 14px;font-family:var(--f-ui);font-weight:600;font-size:16px;letter-spacing:1px}
+.pips{display:flex;gap:6px}
+.pip{width:14px;height:14px;background:rgba(46,27,91,.65);box-shadow:inset 0 0 0 2px rgba(255,244,234,.55)}
+.pip.on{background:var(--yellow);box-shadow:inset 0 0 0 2px #000}
+.btn{border:0;margin:0;cursor:pointer;display:flex;gap:10px;align-items:center;font-family:var(--f-ui);font-weight:600;font-size:18px;padding:10px 16px;line-height:1}
+.btn.quiet{background:rgba(46,27,91,.85);color:var(--cream)}
+.btn.small{font-size:15px;padding:8px 12px;background:rgba(46,27,91,.65);color:var(--cream)}
+.btn.small[aria-expanded="true"]{background:var(--yellow);color:var(--ink);box-shadow:inset 0 0 0 3px #000}
+.btn.go{background:var(--cream);color:var(--ink);box-shadow:inset 0 0 0 3px #000}
+.btn.reveal{background:var(--yellow);color:var(--ink);box-shadow:inset 0 0 0 3px #000;font-weight:700;font-size:20px}
+.btn:focus-visible{box-shadow:inset 0 0 0 4px var(--pink)}
+.btn:hover{filter:brightness(1.08)}
+.btn[hidden]{display:none!important}
+.tri-r{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:10px solid currentColor}
+.tri-l{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-right:10px solid currentColor}
+.bottombar{position:absolute;left:48px;right:48px;top:704px;height:44px;display:flex;justify-content:space-between;align-items:center;z-index:7}
+.hint{font-family:var(--f-ui);font-weight:600;font-size:18px;color:var(--cream);background:rgba(46,27,91,.85);padding:10px 16px}
+.hint:empty{visibility:hidden}
+.vis-hide{visibility:hidden}
+
+/* presenter notes: large, scrollable */
+#notes{position:absolute;left:40px;right:40px;top:72px;bottom:66px;z-index:6;background:var(--night);color:var(--cream);border:6px solid #000;box-shadow:inset 0 0 0 6px var(--lilac2),0 8px 0 rgba(21,12,48,.45);padding:22px 30px 18px;display:flex;flex-direction:column;gap:10px}
+#notes[hidden]{display:none}
+#notes h2{margin:0;font-family:var(--f-pixel);font-size:13px;color:var(--yellow);font-weight:400;display:flex;justify-content:space-between;gap:16px}
+#notes h2 span{color:var(--lilac)}
+#notesBody{flex:1;min-height:0;overflow-y:auto;font-size:21px;line-height:1.5;font-weight:700;padding-right:12px}
+#notesBody p{margin:0 0 12px}
+#notesBody .lab{font-family:var(--f-ui);font-weight:600;font-size:15px;letter-spacing:1px;color:var(--yellow);margin:14px 0 4px}
+#notesBody .lab:first-child{margin-top:0}
+#notes .keys{font-size:14px;color:var(--lilac);font-weight:700;border-top:2px dashed var(--lilac2);padding-top:8px}
+
+/* scene */
+#scene{position:absolute;inset:0}
+.panel{position:absolute;left:48px;top:80px;width:928px;background:var(--cream);border:12px solid #000;box-shadow:inset 14px 14px 0 #d9d9d9,inset -14px -14px 0 #b2aaa3}
+.spanel{height:410px;overflow:hidden}
+.fpanel{height:584px;padding:52px 48px 26px;display:flex;flex-direction:column;gap:18px}
+.fpanel.center{align-items:center;justify-content:center;text-align:center;gap:22px;padding:40px 48px}
+.tags{position:absolute;left:92px;top:66px;display:flex;gap:10px;z-index:2}
+.tag{padding:10px 16px;font-family:var(--f-pixel);font-size:15px;box-shadow:inset 0 0 0 4px #000;display:flex;gap:12px;align-items:center}
+.t-coral{background:var(--coral);color:var(--cream)}
+.t-night{background:var(--night);color:var(--cream)}
+.t-mint{background:var(--mint);color:var(--ink)}
+.t-yellow{background:var(--yellow);color:var(--ink);font-size:12px}
+.pop{animation:pop .3s steps(4) both}
+@keyframes pop{from{transform:translateY(10px);opacity:.2}to{transform:none;opacity:1}}
+
+/* type */
+.h-xl{font-family:var(--f-pixel);font-size:60px;line-height:1.1;color:var(--coral)}
+.h-sub{font-family:var(--f-pixel);font-size:26px;line-height:1.3;color:var(--night)}
+.h-title{font-family:var(--f-ui);font-weight:600;font-size:50px;line-height:1.15;margin-top:8px}
+.ptitle{font-family:var(--f-pixel);font-size:23px;line-height:1.45;color:var(--coral);text-wrap:balance;margin:0}
+.lead{font-weight:800;font-size:26px;line-height:1.35;margin:0;text-wrap:pretty}
+.body{font-weight:700;font-size:22px;line-height:1.4;margin:0}
+.divider{display:flex;gap:14px;align-items:center}
+.dash{width:120px;height:6px;background:repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 12px)}
+.cite{margin-top:auto;font-weight:700;font-size:15px;color:var(--muted)}
+
+/* big buttons */
+.bigbtn{border:0;padding:0;background:none;cursor:pointer;filter:drop-shadow(7px 7px 0 var(--drop));display:block}
+.bigbtn .bo{display:block;background:#000;padding:6px}
+.bigbtn .bi{display:flex;gap:16px;align-items:center;background:var(--yellow);padding:18px 36px;font-family:var(--f-pixel);font-size:28px;color:var(--ink)}
+.bigbtn:hover{transform:translateY(-3px)}
+.bigbtn:active{transform:translateY(4px);filter:drop-shadow(3px 3px 0 var(--drop))}
+.bigbtn:focus-visible{outline:4px dashed var(--yellow);outline-offset:8px}
+.peek{position:absolute;left:790px;top:470px;width:140px;height:154px;object-fit:contain;object-position:bottom}
+
+/* bullets */
+.blist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.blist li{display:flex;gap:16px;align-items:flex-start;font-weight:800;font-size:25px;line-height:1.3}
+.blist li::before{content:"";flex:none;width:14px;height:14px;margin-top:9px;background:var(--coral);box-shadow:3px 3px 0 #000}
+.sect{font-family:var(--f-ui);font-weight:600;font-size:22px;letter-spacing:1px;color:var(--night)}
+
+/* white cards */
+.wcard{position:relative;filter:drop-shadow(5px 5px 0 var(--drop))}
+.wcard>.co{background:#000;padding:5px;height:100%}
+.wcard>.co>.ci{background:var(--white);padding:18px 22px;height:100%;display:flex;flex-direction:column;gap:10px}
+.wcard.hot>.co>.ci{background:var(--yellow)}
+.wcard.soft>.co{background:var(--dimline)}
+.wcard.soft>.co>.ci{background:var(--dim);color:var(--dimtext)}
+.wcard.soft{filter:drop-shadow(5px 5px 0 #b2aaa3)}
+.tight>.wcard>.co>.ci{padding:10px 16px;gap:6px}
+.ck{font-family:var(--f-pixel);font-size:13px;line-height:1.5;color:var(--night)}
+.ct{font-weight:800;font-size:22px;line-height:1.3}
+.cs{font-weight:700;font-size:19px;line-height:1.35}
+.badge{width:54px;height:54px;background:var(--world);color:var(--cream);font-family:var(--f-pixel);font-size:26px;display:flex;align-items:center;justify-content:center;flex:none}
+.badge.sm{width:42px;height:42px;font-size:19px}
+.hot .badge{background:#000;color:var(--yellow)}
+.soft .badge{background:#b2aaa3}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.row{display:flex;gap:16px;align-items:center}
+.itile{flex:none;width:58px;height:58px;background:var(--night);display:flex;align-items:center;justify-content:center}
+.strip{background:var(--night);color:var(--cream);font-family:var(--f-ui);font-weight:600;font-size:24px;line-height:1.3;padding:14px 22px}
+.chipx{display:inline-flex;align-items:center;gap:8px;padding:5px 10px;font-family:var(--f-ui);font-weight:700;font-size:14px;letter-spacing:.5px;box-shadow:inset 0 0 0 3px #000}
+.chipx.pick{background:var(--coral);color:var(--cream)}
+.chipx.view{background:var(--night);color:var(--yellow)}
+.chipx.no{background:var(--white);color:var(--dimtext)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+
+/* dialogue box */
+.dwrap{position:absolute;left:32px;top:452px;width:960px;height:232px;z-index:3}
+.dbox{position:absolute;inset:0;background:var(--night);border:6px solid #000;box-shadow:inset 0 0 0 8px var(--lilac),inset 0 0 0 12px var(--lilac2),0 8px 0 rgba(21,12,48,.45);padding:24px 40px 24px 24px;display:flex;gap:26px;align-items:center;cursor:pointer}
+.dbox.noface{padding:34px 52px}
+.portrait{flex:none;width:184px;height:184px;border:6px solid #000;box-shadow:inset 0 0 0 4px var(--lilac);background:var(--yellow);overflow:hidden}
+.portrait img{width:172px;height:222px;object-fit:cover;object-position:top center;display:block;margin:0 auto}
+.dtext{flex:1;min-width:0;color:var(--cream);font-family:var(--f-ui);font-weight:600;line-height:1.28;display:flex;flex-direction:column;gap:8px}
+.dtext p{margin:0}
+.nametag{position:absolute;left:236px;top:-22px;z-index:2;background:var(--yellow);box-shadow:inset 0 0 0 4px #000;padding:9px 14px;font-family:var(--f-pixel);font-size:13px;color:var(--ink)}
+.nametag.left{left:28px}
+.stud{position:absolute;width:20px;height:20px;background:var(--cream);border:5px solid #000}
+.stud.tl{left:-6px;top:-6px}.stud.tr{right:-6px;top:-6px}.stud.bl{left:-6px;bottom:-6px}.stud.br{right:-6px;bottom:-6px}
+.cue{position:absolute;right:30px;bottom:26px;width:20px;height:14px;background:var(--yellow);clip-path:polygon(0 0,100% 0,50% 100%);visibility:hidden}
+.cue.on{visibility:visible;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* choices */
+.choice{position:relative;display:block;width:100%;border:0;padding:0;margin:0;background:none;cursor:pointer;text-align:left;font:inherit;color:var(--ink);filter:drop-shadow(6px 6px 0 var(--drop));transition:transform .12s steps(2)}
+.choice .co{display:block;height:100%;background:#000;padding:6px}
+.choice .ci{display:flex;gap:16px;align-items:center;height:100%;background:var(--white);padding:16px 20px}
+.choice .ci.col{flex-direction:column;align-items:stretch;gap:12px}
+.ctop{display:flex;gap:14px;align-items:center}
+.chead{flex:1;min-width:0;font-family:var(--f-pixel);font-size:15px;line-height:1.5;color:var(--coral)}
+.ctext{font-weight:800;line-height:1.28}
+.cname{font-family:var(--f-ui);font-weight:600;font-size:32px}
+.cicon{flex:none;display:flex;align-items:center}
+.flag{display:none;position:absolute;right:20px;top:-20px;background:var(--coral);color:var(--cream);font-family:var(--f-pixel);font-size:12px;padding:9px 11px;gap:10px;align-items:center;box-shadow:inset 0 0 0 3px #000}
+.check{width:16px;height:9px;border-left:4px solid currentColor;border-bottom:4px solid currentColor;transform:rotate(-45deg) translate(1px,-2px)}
+.choice:hover{transform:translateY(-3px)}
+.choice:focus-visible{outline:4px dashed var(--yellow);outline-offset:6px}
+.choice[aria-pressed="true"]{transform:translateY(-6px);filter:drop-shadow(8px 8px 0 var(--drop))}
+.choice[aria-pressed="true"] .ci{background:var(--yellow)}
+.choice[aria-pressed="true"] .badge{background:#000;color:var(--yellow)}
+.choice[aria-pressed="true"] .chead{color:var(--ink)}
+.choice[aria-pressed="true"] .ctext{font-weight:900}
+.choice[aria-pressed="true"] .flag{display:flex}
+.has-pick .choice[aria-pressed="false"]{filter:drop-shadow(6px 6px 0 #b2aaa3)}
+.has-pick .choice[aria-pressed="false"] .co{background:var(--dimline)}
+.has-pick .choice[aria-pressed="false"] .ci{background:var(--dim);color:var(--dimtext)}
+.has-pick .choice[aria-pressed="false"] .badge{background:#b2aaa3}
+.has-pick .choice[aria-pressed="false"] .chead{color:var(--dimline)}
+.has-pick .choice[aria-pressed="false"] .cicon{opacity:.55}
+.cgrid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 30px}
+.crows{display:flex;flex-direction:column;gap:12px}
+.crows .choice .ci{padding:10px 18px}
+.crows .flag{top:-14px;font-size:11px;padding:7px 9px}
+.qzone{position:absolute;left:96px;top:126px;width:832px;height:310px;display:flex;flex-direction:column;justify-content:center}
+
+/* arrows (slide 5) */
+.arrows{display:flex;gap:46px;justify-content:center;align-items:flex-end;flex:1;min-height:0}
+.arr{display:flex;flex-direction:column;align-items:center;gap:10px}
+.arr svg{display:block;shape-rendering:crispEdges}
+.arr span{font-family:var(--f-ui);font-weight:700;font-size:18px;text-align:center;line-height:1.2;max-width:200px}
+
+/* venn (slide 9) */
+
+
+/* intro story pieces */
+.tile{filter:drop-shadow(5px 5px 0 var(--drop))}
+.tile.abs{position:absolute}
+.tile .to{background:#000;padding:5px}
+.tile .ti{background:var(--white);width:168px;height:156px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 8px}
+.tile.sm .ti{width:150px;height:128px;gap:10px}
+.t-l{font-family:var(--f-pixel);font-size:14px;line-height:1.4;color:var(--coral)}
+.artrow{display:flex;gap:22px;align-items:center;justify-content:center}
+.art{position:absolute;inset:0;padding-bottom:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.plus{font-family:var(--f-pixel);font-size:34px;color:var(--night)}
+.stamp{font-family:var(--f-pixel);font-size:40px;color:var(--coral);border:8px dashed var(--coral);padding:18px 26px;transform:rotate(-4deg)}
+.crew{display:flex;gap:26px;align-items:flex-end}
+.hero{position:absolute;left:300px;top:22px;width:304px;height:390px;object-fit:contain;object-position:top center}
+
+/* figures drawn as inline svg */
+.fig{display:block;margin:0 auto;max-width:100%;height:auto}
+.fig .px{font-family:var(--f-pixel)}
+.fig .bd{font-family:var(--f-body);font-weight:800}
+
+
+/* mini meters on choice cards */
+.viz{display:flex;flex-direction:column;gap:7px;padding:10px 12px;background:#f3eefc;box-shadow:inset 0 0 0 3px #cfc4ea}
+.vrow{display:flex;align-items:center;gap:12px}
+.vl{width:104px;font-family:var(--f-ui);font-weight:700;font-size:15px;letter-spacing:.5px;color:var(--night)}
+.vtrack{flex:1;height:18px;position:relative;box-shadow:inset 0 0 0 3px var(--lilac2);background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(157,143,192,.25) 6px 12px)}
+.vfill{position:absolute;left:0;top:0;bottom:0;box-shadow:inset 0 0 0 3px #000}
+.f-users{background:var(--sky)}
+.f-learn{background:var(--mint)}
+.choice[aria-pressed="true"] .viz{background:#fff6cf;box-shadow:inset 0 0 0 3px #d9b93f}
+.has-pick .choice[aria-pressed="false"] .viz{opacity:.55}
+
+/* numbered step lists on choice cards */
+.steplist{margin:0;padding:0 0 0 22px;display:flex;flex-direction:column;gap:5px;font-weight:800;font-size:15.5px;line-height:1.22}
+.steplist li::marker{font-family:var(--f-ui);font-weight:700;color:var(--coral)}
+.choice[aria-pressed="true"] .steplist li::marker{color:var(--ink)}
+
+/* placeholder */
+.bigface{width:230px;height:280px;object-fit:contain;object-position:bottom center}
+
+@media (prefers-reduced-motion:reduce){
+  .pop,.cue.on{animation:none}
+  .choice,.bigbtn{transition:none}
+}
+</style>
+
+<div id="app">
+  <div id="vp">
+    <div id="stage" role="region" aria-label="Social Resume: The Intern Challenge, classroom game">
+      <img class="decor pix" src="assets/star.png" alt="" style="left:4px;top:236px;width:44px;height:36px">
+      <img class="decor pix" src="assets/star.png" alt="" style="left:978px;top:290px;width:44px;height:36px">
+      <img class="decor pix" src="assets/star.png" alt="" style="left:160px;top:30px;width:22px;height:18px">
+      <img class="decor pix" src="assets/cloud.png" alt="" style="left:-14px;top:600px;width:176px;height:80px">
+      <img class="decor pix" src="assets/coin.png" alt="" style="left:934px;top:54px;width:60px;height:60px">
+
+      <div id="scene"></div>
+
+      <div id="notes" class="n4" hidden>
+        <h2>PRESENTER NOTES <span id="notesSlide"></span></h2>
+        <div id="notesBody" tabindex="0"></div>
+        <div class="keys">→ / Space / Page Down: next · ← / Page Up: back · A–D: select · F: full screen · N: notes</div>
+      </div>
+
+      <div class="topbar">
+        <div class="tb-left">
+          <div class="chip n4" id="chip">1 / 35</div>
+          <div class="pips" id="pips" aria-label="Question progress"></div>
+        </div>
+        <div class="tb-right">
+          <button class="btn small n4" id="notesBtn" type="button" aria-expanded="false" aria-controls="notes">Notes</button>
+          <button class="btn small n4" id="fsBtn" type="button">Full screen</button>
+        </div>
+      </div>
+
+      <div class="bottombar">
+        <button class="btn quiet n4" id="backBtn" type="button"><span class="tri-l"></span>Back</button>
+        <div class="hint n4" id="hint" aria-live="polite"></div>
+        <button class="btn go n4" id="nextBtn" type="button"><span id="nextLabel">Continue</span><span class="tri-r"></span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const A = n => 'assets/' + n + '.png';
+  const FACE = { hh: A('prof-hoodie-happy'), ht: A('prof-hoodie-thinking'), sh: A('prof-suit-happy'), st: A('prof-suit-thinking'), ss: A('prof-suit-surprised'), sw: A('prof-suit-worried') };
+  const FACE_ALT = { hh:'Mr. Xu in his hoodie, smiling', ht:'Mr. Xu in his hoodie, thinking', sh:'Mr. Xu, smiling', st:'Mr. Xu, thinking', ss:'Mr. Xu, surprised', sw:'Mr. Xu, worried' };
+  const IC = {
+    heart:[A('i-heart'),9,8], bowl:[A('i-bowl'),11,9], people:[A('i-people'),11,8], books:[A('i-books'),11,9],
+    coin:[A('coin'),12,12], person:[A('i-person'),6,8], company:[A('i-company'),9,9]
+  };
+  function icon(k, s){ const c = IC[k]; return '<img class="pix" src="' + c[0] + '" alt="" style="width:' + (c[1]*s) + 'px;height:' + (c[2]*s) + 'px">'; }
+  const CHECK = '<span class="check" aria-hidden="true"></span>';
+  const esc = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const card = (inner, cls) => '<div class="wcard ' + (cls||'') + '"><div class="co n6"><div class="ci n6">' + inner + '</div></div></div>';
+  const tags = list => '<div class="tags">' + list.map(t => '<div class="tag n4 ' + t[1] + '">' + t[0] + '</div>').join('') + '</div>';
+
+  // ---------------- question content (from the slide notes) ----------------
+  const Q = {
+    q1: { num:1, multi:false, ask:'Which business seems most similar to the Social Resume?',
+      opts:{ A:'Uber', B:'Baidu', C:'McKinsey', D:'Starbucks' }, view:['A'] },
+    q2: { num:2, multi:false, two:true,
+      opts:{ A:{head:'GAIN MORE USERS', text:'Grow fast. More users means more data, and better matches for everyone.', icon:'people'},
+             B:{head:'GAIN DATA FROM EXISTING APPS', text:'Get data that other apps already have, so our AI can learn before we even have users.', icon:'books'} } },
+    q3: { num:3, multi:true, ask:'Our client believes that even a bad match will give the Social Resume meaningful data for better matches. Which statements best represent how the respective authors will assess this belief?',
+      opts:{
+        A:'Author 1 would agree with our client because there is a data network effect if the data collected from the bad match helps the platform make better matches.',
+        B:'Author 1 would disagree with our client even if the data collected from the bad match helps the platform make better matches.',
+        C:'Author 2 would agree with our client because the data provides the Social Resume value because it can be used to improve its service.',
+        D:'Author 2 would disagree with our client because the bad match decreased the user’s perceived value of the platform even if the data collected from the bad match helps the platform make better matches.' },
+      view:['A','C'] },
+    q4: { num:4, multi:true,
+      opts:{
+        A:'This is value creation, because the app helped users find a match.',
+        B:'This is value capture: Social Resume earns more without making the service any better.',
+        C:'Like Battlefront II’s players, users might feel manipulated and push back or leave.',
+        D:'Social Resume can’t do this unless users tell it how much they’d pay.' },
+      view:['B','C'],
+      why:{
+        B:'The dinner booking already existed; the app just put it behind a paywall at the moment users want it most, using data to choose that moment.',
+        C:'Users are outside the firm, so they can protest or switch apps, just as gamers forced EA to back down.',
+        A:'Helping users find a match created value earlier, but locking the button doesn’t create anything new.',
+        D:'The AI estimated willingness to pay from behavior, with no one having to say it.' } }
+  };
+  Q.q5 = { num:5, multi:false, two:true,
+    opts:{ A:{head:'START FROM SCRATCH', viz:[45,5], text:'Scrap our matching AI and rebuild it. It learned from people who left.'},
+           B:{head:'KEEP THE LESSONS', viz:[45,85], text:'Keep what our AI already learned, and focus on bringing new people in.'} } };
+  Q.q6 = { num:6, multi:false, two:true,
+    opts:{ A:{head:'GET BIG FAST', icon:'people', text:'Recruit more relevant users.'},
+           B:{head:'LEARNING OVER GROWTH', icon:'books', text:'Test and improve our matching with the users we already have.'} } };
+  Q.q6b = { num:6, multi:false, two:true,
+    opts:{ A:{head:'GET BIG FAST', icon:'people', text:'Recruit more relevant users.'},
+           B:{head:'LEARNING OVER GROWTH', icon:'books', text:'Run more matching experiments.'} } };
+  Q.q5n = { num:5, multi:false,
+    opts:{
+      A:['Hire marketing agency to increase usership','Analyze internal data','Sell internal data for increased revenue','Identify the network effect threshold','Invest revenues to increase usership'],
+      B:['Buy external data for analysis','Invest revenues to increase usership','Analyze internal data','Sell internal data for increased revenue','Diversify subscription tiers to increase revenue','Reinvest revenues to increase usership'],
+      C:['Acquire a manageable set of users for data analysis','Buy external data for analysis','Identify the network effect threshold','Hire marketing agency to increase usership'] },
+    view:['C'],
+    why:{
+      C:'A manageable set of users provides sufficient preliminary data that insights are drawn from, with potential help from external data (focusing on data-driven learning). Knowing the network effect threshold creates a target usership level, which an agency can help reach (focusing on the network effect).',
+      A:'Increasing usership first falls in line with the “get big fast” strategy for reaching network effects, but identifying the threshold helps before user acquisition.',
+      B:'It also prioritizes achieving network effects first, which isn’t what Mr. Xu wants.' } };
+  const QORDER = ['q1','q2','q3','q4','q5n'];
+  const qpip = k => k === 'q6b' ? 'q6' : k;
+
+  // ---------------- screens ----------------
+  // notes: array of [label, text] pairs shown in the presenter Notes panel (script, word for word with typos fixed)
+  const S = [
+    { t:'title', slide:1, sec:'START', nx:null,
+      notes:[['SLIDE 1 · TITLE SLIDE','Click START (or press →) when the class is ready.']] },
+
+    { t:'meet', slide:'intro', sec:'MEET MR. XU', who:'NARRATOR',
+      pages:[['*Meet the professor, Mr. Xu!*','He has two great loves: his family and food.']],
+      notes:[['STORY INTRO (BEFORE SLIDE 2)','Meet the professor, Mr. Xu! He has two great loves: his family and food.']] },
+    { t:'speech', art:'loves', face:'hh', who:'MR. XU', slide:'intro', sec:'MEET MR. XU',
+      pages:[['I’ve been lucky in love.','Now I want to help other people find their people…','and somewhere *good to eat!*']],
+      notes:[['STORY INTRO (BEFORE SLIDE 2)','Mr. Xu: “I’ve been lucky in love. Now I want to help other people find their people… and somewhere good to eat!”']] },
+    { t:'speech', art:'idea', face:'ht', who:'MR. XU', slide:'intro', sec:'MEET MR. XU',
+      pages:[['What if an app could help people make connections over *shared interests and meals?*']],
+      notes:[['STORY INTRO (BEFORE SLIDE 2)','Mr. Xu: “What if an app could help people make connections over shared interests and meals?”']] },
+    { t:'startup', slide:'intro', sec:'MEET MR. XU',
+      notes:[['STORY INTRO (BEFORE SLIDE 2)','Introducing… SOCIAL RESUME. Friends. Dates. Dinner.']] },
+    { t:'speech', art:'hired', face:'ss', who:'MR. XU', slide:'intro', sec:'MEET MR. XU',
+      pages:[['I have the idea.','Now I need your advice.','*You’re my intern consultants!*']],
+      notes:[['STORY INTRO (BEFORE SLIDE 2)','Mr. Xu: “I have the idea. Now I need your advice. You’re my intern consultants!”']] },
+
+    { t:'role', slide:2, sec:'INTRODUCTION',
+      notes:[['SLIDE 2 · SCRIPT','“He has hired all of you as intern consultants to guide his startup (Social Resume)’s pre-launch process. We are your managers at A16ZYC Consultants, so we are here to guide you.']] },
+    { t:'structure', slide:2, sec:'INTRODUCTION',
+      notes:[['SLIDE 2 · SCRIPT (CONTINUED)','Our presentation will introduce major concepts from Clough & Wu’s research paper. After introducing each concept, you will have to make a decision that can alter how the Social Resume launches – and if you get a return offer or not.”']] },
+
+    { t:'papers', slide:3, sec:'INTRODUCTION',
+      notes:[['SLIDE 3 · SCRIPT','“Interns, to help our client’s start-up we found two important research papers. The one we want you to apply is a response to the other. Paper 1 is written by Gregory et al. – we’ll call them Author 1. Paper 2 – which is the one you’ll have to apply – is written by Clough & Wu – we’ll call them Author 2.”']] },
+    { t:'company', slide:3, sec:'INTRODUCTION',
+      notes:[['SLIDE 3 · SCRIPT (CONTINUED)','The Social Resume is a social networking & dating platform driven by AI – set to launch in New York City. Its primary revenue source will come from 3 tiers of subscriptions – cheapest to most expensive: (1) Socialites for friend connections; (2) Lovebirds for dates; (3) Connectors for both types of connections. Users get matched with each other based on collected data, and the platform’s AI algorithm creates an itinerary & makes the bookings from restaurants to concerts and more.']] },
+    { t:'network', slide:3, sec:'INTRODUCTION',
+      notes:[['SLIDE 3 · SCRIPT (CONTINUED)','Our papers are especially relevant because they deal with data’s role in a platform’s operation – Social Resume. In economics, there is the “network effect,” “where a service becomes more valuable to its users as more people use it” (HSB).']] },
+
+    { t:'q1', slide:4, sec:'QUESTION 1', q:'q1', who:'YOUR MANAGERS',
+      pages:[['Which business seems most similar to *the Social Resume?*']],
+      notes:[['SLIDE 4 · QUESTION 1','Which business seems most similar to the Social Resume? A. Uber · B. Baidu · C. McKinsey · D. Starbucks'],['ANSWER (SHOWN ON THE NEXT SCREEN)','Uber, because it is a platform that relies on geographic and personal data to match riders with drivers – similar to the Social Resume’s matching function.']] },
+    { t:'q1r', slide:4, sec:'QUESTION 1', q:'q1',
+      notes:[['SLIDE 4 · ANSWER','Uber, because it is a platform that relies on geographic and personal data to match riders with drivers – similar to the Social Resume’s matching function.']] },
+
+    { t:'q2', slide:'4–5', sec:'QUESTION 2', q:'q2', face:'st', who:'MR. XU',
+      pages:[['Before we launch, I want our AI to make *great matches.*','*What should we do first?*']],
+      notes:[['NEW TRANSITION QUESTION (REPLACES “ADD QUESTION HERE”)','Mr. Xu: “Before we launch, I want our AI to make great matches. What should we do first?” A · Gain more users. B · Gain data from existing apps. Neither answer is wrong: each option is one author’s argument.']] },
+    { t:'q2r', slide:'4–5', sec:'QUESTION 2', q:'q2', who:'YOUR MANAGERS',
+      pages:[['Let’s see why *they see it differently.*']],
+      notes:[['QUESTION 2 · REVEAL','Neither is wrong. They’re the two authors’ arguments.'],['A · AUTHOR 1','Users and data grow together: more people, more data, more value for users. That’s their “data network effect.”'],['B · AUTHOR 2','Data and users are separate: a company can get data before it has any users. And more data doesn’t automatically mean users feel they get more value.']] },
+
+    { t:'theory1', slide:5, sec:'THE TWO THEORIES',
+      notes:[['SLIDE 5 · AUTHOR 1','Author 1’s theory is: AI and this priority to harvest more data create this network effect (called the “data network effect”), suggesting that users of a platform believe they get more value the more data the platform collects from higher platform usage.']] },
+    { t:'theory2', slide:5, sec:'THE TWO THEORIES',
+      notes:[['SLIDE 5 · AUTHOR 2','Author 2 doesn’t disagree but adds nuance: More usage of a platform might generate more data, but this doesn’t mean that there is a “data network effect” that makes users believe they get more value from the platform.']] },
+
+    { t:'q3', slide:6, sec:'QUESTION 3', q:'q3',
+      notes:[['SLIDE 6 · QUESTION 2 IN YOUR NOTES','Our client believes that even a bad match will give the Social Resume meaningful data for better matches. Which statements best represent how the respective authors will assess this belief? Select all that apply.'],['ANSWER (SHOWN ON THE NEXT SCREENS)','A and C.']] },
+    { t:'q3r', slide:6, sec:'QUESTION 3', q:'q3',
+      notes:[['SLIDE 6 · ANSWER','A and C are correct.']] },
+    { t:'q3why', slide:6, sec:'QUESTION 3', q:'q3',
+      notes:[['SLIDE 6 · EXPLANATION','A and C are correct. This is to demonstrate that (1) the authors are not completely disagreeing in the papers, (2) this scenario is about if the data is meaningful, not if there is a data network effect, (3) a bad match’s generation is increased user usage, which may cause a short-term bad effect, but IF the Social Resume analyzes what went wrong meaningfully so that future matches are better, users get more value.']] },
+
+    { t:'venn', slide:9, sec:'AUTHOR 2’S MAIN POINT',
+      notes:[['SLIDE 9 · SCRIPT','Author 2 anchors his paper on one major distinction that he believes Author 1 failed to account for: Data is controlled by the firm, but not the users and complementors – they can leave the platform when they want.'],['','“Ultimately, Author 2 says: Because users can leave, increased usage of a platform and data from said usage doesn’t necessarily mean that users will consistently perceive increased value – described by Author 1 as the data network effect.”']] },
+    { t:'two', slide:10, sec:'AUTHOR 2’S MAIN POINT',
+      notes:[['SLIDE 10 · SCRIPT','This premise is supported by two analyses: (1) Data can create value for a platform and its users, but just because it is created, doesn’t mean users automatically perceive they get more value. (2) Platforms that practice “data-driven learning” do not necessarily experience a “network effect,” so the “data network effect” isn’t accurate.']] },
+    { t:'an1pie', slide:11, sec:'ANALYSIS 1',
+      notes:[['SLIDE 11 · PUT THIS ON THE SLIDE','Data can create value for a platform and its users, but just because it is created, doesn’t mean users automatically perceive they get more value.'],['VISUAL','Author 1’s Assumption = value creation: everyone gets more. With more data, the pie grows and both sides keep an equal share. Author 2’s Nuance = value capture: the company takes more. With more data, the pie grows, but the company takes three quarters and users get one quarter.']] },
+    { t:'an1', slide:11, sec:'ANALYSIS 1',
+      notes:[['SLIDE 11 · SCRIPT','“The author uses two examples to demonstrate how data can benefit a platform: 1, User-Level Price Discrimination; 2, Value Capture at the Expense of Value Creation.”']] },
+    { t:'price', slide:12, sec:'ANALYSIS 1',
+      notes:[['SLIDE 12 · SCRIPT','“1: User-Level Price Discrimination’s purpose is to define how much each customer segment is willing to pay for a service. This can be through logins, cookies, device IDs, and more tactics. Companies can exploit psychological states, which means extracting value at a customer’s moment of vulnerability. The author cites Facebook’s ability to detect when teens felt insecure, which would affect which advertisers’ material would show on the screen.”']] },
+    { t:'capture', slide:13, sec:'ANALYSIS 1',
+      notes:[['SLIDE 13 · SCRIPT','“2: The author exemplifies ‘Value Capture at the Expense of Value Creation’ through free websites that run ads to generate revenue. Users get value from using the free website, the platform earns money from advertisers, and the advertisers earn the users’ attention. It is up to the platform how many ads they put that may create annoyances for the users, prompting them to stop using the website. From this, platforms earn more for displaying more ads while certain users perceive less value.”'],['','“Ultimately, users catch on to how their data may be used to manipulate them. A major example Author 2 uses is Uber. In 2019, drivers sued the company for accessing their personal data in concern that it’s used to manipulate them to drive longer or to cut their wages. In this case (if true), Uber earns more money and gets more labor while the drivers (also users despite not being riders) derive less value.”']] },
+
+    { t:'q4', slide:14, sec:'QUESTION 4', q:'q4', who:'YOUR MANAGERS',
+      pages:[['Social Resume’s AI notices that free users who have been chatting with a match for a week are *very likely to pay to meet them.*'],['So our client locks the *“Book a dinner”* button behind the *Lovebirds* tier, but only after that first week.'],['Which statements would *Author 2* agree with? *Select all that apply.*']],
+      notes:[['SLIDE 14 · QUESTION 3 IN YOUR NOTES','Scenario: Social Resume’s AI notices that free users who have been chatting with a match for a week are very likely to pay to meet them. So our client locks the “Book a dinner” button behind the Lovebirds tier, but only after that first week. Which statements would Author 2 agree with?'],['ANSWER (SHOWN ON THE NEXT SCREEN)','B and C.']] },
+    { t:'q4r', slide:14, sec:'QUESTION 4', q:'q4',
+      notes:[['SLIDE 14 · ANSWER','Answer: B and C.'],['','B: The dinner booking already existed; the app just put it behind a paywall at the moment users want it most, using data to choose that moment.'],['','C: Users are outside the firm, so they can protest or switch apps, just as gamers forced EA to back down.'],['','A is wrong: helping users find a match created value earlier, but locking the button doesn’t create anything new.'],['','D is wrong: the AI estimated willingness to pay from behavior, with no one having to say it.']] },
+
+    { t:'an2', slide:15, sec:'ANALYSIS 2',
+      notes:[['SLIDE 15 · PUT THIS ON THE SLIDE','Platforms that practice “data-driven learning” do not necessarily experience a “network effect,” so the “data network effect” isn’t accurate.'],['SCRIPT','“Author 2 questions if Author 1’s use of “data network effect” is accurate for two reasons: (1) Data-driven learning is path dependent; (2) Data can be traded unlike users.”']] },
+    { t:'path', slide:16, sec:'ANALYSIS 2',
+      notes:[['SLIDE 16 · DATA-DRIVEN LEARNING PATH DEPENDENCE','There are direct and indirect network effects. Network effects depend on users’ belief if there are other users on a platform to join to capture that value – therefore, there is a “threshold” of how many users should be on a platform to encourage users to join, creating that network effect. If a dating app has too few users, other users may not like to join at the risk of not finding successful matches; however, if there are said to be a high number of users, users know that the platform has plentiful “fish in the sea” to justify joining. A platform can drop below this threshold, losing this network effect – making the network effect dependent on the present. Unlike network effects, data-driven learning depends on the history – not present – of how much data is accumulated and insights can be made to derive value, and there is no proof of a “threshold” that generates more value for users. This difference in whether the present matters more or history does is what Author 2 means by path dependence.']] },
+    { t:'trade', slide:17, sec:'ANALYSIS 2',
+      notes:[['SLIDE 17 · DATA’S TRADABILITY','As covered in the last slide, users dropping below a certain threshold destroys the network effect. Once users leave, the firm cannot physically control the users to return. With data-driven learning, once data is collected, the firm has it. This difference in autonomy questions whether data can cause this network effect as people on a platform can, to justify the “data network effect” concept.'],['CASE STUDY','Twitter shows that data can be sold like any other product: the paper notes that licensing user data to other companies was one of Twitter’s most profitable businesses, and since 2023, X has charged businesses $42,000 a month for access.']] },
+
+    { t:'strategy', slide:19, sec:'STRATEGY',
+      notes:[['SLIDE 19 · STRATEGIC IMPLICATIONS','Ultimately this question of whether data can create this network effect creates two strategic implications:'],['','(1) If a manager thinks network effects lead to competitive advantage in a market, the goal should be to “get big fast” – more people, more value that users perceive.'],['','(2) If a manager thinks data-driven learning leads to competitive advantage, the goal should be to scale slower to learn about their users and gather this data.'],['','The term “data network effects” merges managers’ different priorities regarding network effects and data-driven learning into one concept despite requiring opposite strategies to acquire competitive advantage.']] },
+    { t:'steps', slide:20, sec:'QUESTION 5', q:'q5n', face:'st', who:'MR. XU', tag:'QUESTION 5',
+      pages:[['I want Social Resume to focus on *data-driven learning first*, and then prioritize creating a *network effect*.','Which action sequence *best fits* that plan?']],
+      notes:[['SLIDE 20 · QUESTION 5','Mr. Xu wants Social Resume to focus on data-driven learning first and then prioritize creating a network effect. Which action sequence best fits this description?'],['(A)','Hire marketing agency to increase usership, Analyze internal data, Sell internal data for increased revenue, Identify the network effect threshold, Invest revenues to increase usership'],['(B)','Buy external data for analysis, Invest revenues to increase usership, Analyze internal data, Sell internal data for increased revenue, Diversify subscription tiers to increase revenue, Reinvest revenues to increase usership'],['(C)','Acquire a manageable set of users for data analysis, Buy external data for analysis, Identify the network effect threshold, Hire marketing agency to increase usership'],['CORRECT ANSWER','C because a manageable set of users provides sufficient preliminary data that insights are drawn from with potential help from external data (focusing on data-driven learning); knowing the network effect threshold creates a target usership level, which an agency can help reach (focusing on network effect).'],['WRONG ANSWERS','A is wrong because increasing usership first falls in line with the “get big fast” strategy for reaching network effects, but identifying the threshold helps before user acquisition. B is wrong because it also prioritizes achieving network effects first, which isn’t what Mr. Xu wants.']] },
+    { t:'q5r', slide:20, sec:'QUESTION 5', q:'q5n',
+      notes:[['CORRECT ANSWER','C because a manageable set of users provides sufficient preliminary data that insights are drawn from with potential help from external data (focusing on data-driven learning); knowing the network effect threshold creates a target usership level, which an agency can help reach (focusing on network effect).'],['WRONG ANSWERS','A is wrong because increasing usership first falls in line with the “get big fast” strategy for reaching network effects, but identifying the threshold helps before user acquisition. B is wrong because it also prioritizes achieving network effects first, which isn’t what Mr. Xu wants.']] },
+    { t:'speech', art:'offer', face:'sh', who:'MR. XU', slide:'end', sec:'RETURN OFFERS', nx:'Play again',
+      pages:[['So… who gets the return offer?']],
+      notes:[['FINAL SCREEN · WHO GETS THE RETURN OFFER?','Mr. Xu: “So… who gets the return offer?”']] }
+  ];
+
+  // ---------------- renderers ----------------
+  function dbox(s){
+    const face = s.face ? '<div class="portrait"><img src="' + FACE[s.face] + '" alt="' + FACE_ALT[s.face] + '"></div>' : '';
+    return '<div class="dwrap"><div class="nametag n4' + (s.face ? '' : ' left') + '">' + (s.who || 'YOUR MANAGERS') + '</div>'
+      + '<div class="dbox' + (s.face ? '' : ' noface') + '" id="dbox">' + face + '<div class="dtext" id="dtext" aria-live="polite"></div></div>'
+      + '<div class="stud tl"></div><div class="stud tr"></div><div class="stud bl"></div><div class="stud br"></div><div class="cue" id="cue"></div></div>';
+  }
+  function upArrow(w, h, fill, down){
+    const sh = Math.round(w * 0.36), hx = Math.round(h * 0.38);
+    const pts = [[w/2,2],[w-2,hx],[w/2+sh/2,hx],[w/2+sh/2,h-2],[w/2-sh/2,h-2],[w/2-sh/2,hx],[2,hx]].map(p => p.join(',')).join(' ');
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true"' + (down ? ' style="transform:rotate(180deg)"' : '') + '><polygon points="' + pts + '" fill="' + fill + '" stroke="#000" stroke-width="5" stroke-linejoin="miter"></polygon></svg>';
+  }
+  function tile(k, label, s, cls){ return '<div class="tile ' + (cls||'') + '"><div class="to n6"><div class="ti n6">' + icon(k, s||6) + '<div class="t-l">' + label + '</div></div></div></div>'; }
+  const ART = {
+    loves: () => '<div class="artrow">' + tile('heart','LOVE',8) + '<div class="plus" aria-hidden="true">+</div>' + tile('bowl','FOOD',7) + '</div>',
+    idea: () => '<div class="artrow">' + tile('books','INTERESTS',6,'sm') + '<div class="plus" aria-hidden="true">+</div>' + tile('people','PEOPLE',6,'sm') + '<div class="plus" aria-hidden="true">+</div>' + tile('bowl','MEALS',6,'sm') + '</div>',
+    offer: () => '<div class="stamp">RETURN OFFER!</div><div class="crew">' + icon('person',8) + icon('person',9) + icon('person',8) + icon('person',9) + icon('person',8) + '</div><div class="t-l" style="color:var(--night)">THE WHOLE INTERN CLASS</div>',
+    hired: () => '<div class="stamp">YOU’RE HIRED!</div><div class="crew">' + icon('person',8) + icon('person',9) + icon('person',8) + '</div><div class="t-l" style="color:var(--night)">INTERN CONSULTANTS</div>'
+  };
+
+  // Venn (slide 9): platform contains data; users = overlap with market
+  function vennSVG(){
+    const ink = '#2e1b5b', r = 170, lx = 178, rx = 362, cy = 176;
+    const t = (x, y, cls, size, txt) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" class="' + cls + '" font-size="' + size + '" fill="' + ink + '">' + txt + '</text>';
+    return '<svg class="fig" width="546" height="356" viewBox="0 0 546 356" role="img" aria-label="Venn diagram. The Platform circle (the firm) contains Data, owned and controlled by the firm. The Market circle holds rival apps and other options. Users sit in the overlap: on the platform, free to leave.">'
+      + '<defs><clipPath id="vl"><circle cx="' + lx + '" cy="' + cy + '" r="' + r + '"></circle></clipPath></defs>'
+      + '<circle cx="' + (lx+7) + '" cy="' + (cy+7) + '" r="' + r + '" fill="' + ink + '"></circle>'
+      + '<circle cx="' + (rx+7) + '" cy="' + (cy+7) + '" r="' + r + '" fill="' + ink + '"></circle>'
+      + '<circle cx="' + lx + '" cy="' + cy + '" r="' + r + '" fill="#cbc1f6"></circle>'
+      + '<circle cx="' + rx + '" cy="' + cy + '" r="' + r + '" fill="#bfe5cf"></circle>'
+      + '<circle cx="' + rx + '" cy="' + cy + '" r="' + r + '" fill="#f4b8ca" clip-path="url(#vl)"></circle>'
+      + '<circle cx="' + lx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + ink + '" stroke-width="5"></circle>'
+      + '<circle cx="' + rx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + ink + '" stroke-width="5"></circle>'
+      + '<circle cx="96" cy="208" r="66" fill="' + ink + '"></circle>'
+      + '<circle cx="92" cy="203" r="63" fill="#f2c443" stroke="' + ink + '" stroke-width="5"></circle>'
+      + t(148, 64, 'px', 19, 'Platform') + t(148, 88, 'bd', 15, 'the firm')
+      + t(92, 190, 'px', 15, 'Data') + t(92, 212, 'bd', 12, 'owned and') + t(92, 228, 'bd', 12, 'controlled') + t(92, 244, 'bd', 12, 'by the firm')
+      + t(270, 168, 'px', 17, 'Users') + t(270, 192, 'bd', 13, 'on the platform,') + t(270, 210, 'bd', 13, 'free to leave')
+      + t(448, 168, 'px', 17, 'Market') + t(448, 192, 'bd', 13, 'rival apps and') + t(448, 210, 'bd', 13, 'other options')
+      + '</svg>';
+  }
+
+  // Pies (slide 11): Author 1's assumption vs Author 2's nuance
+  function piesSVG(){
+    const ink = '#2e1b5b', CO = '#cbc1f6', US = '#f4b8ca';
+    const half = (cx, cy, r) => '<circle cx="' + (cx+5) + '" cy="' + (cy+5) + '" r="' + r + '" fill="' + ink + '"></circle>'
+      + '<path d="M' + cx + ' ' + (cy-r) + ' A' + r + ' ' + r + ' 0 0 0 ' + cx + ' ' + (cy+r) + ' Z" fill="' + US + '"></path>'
+      + '<path d="M' + cx + ' ' + (cy-r) + ' A' + r + ' ' + r + ' 0 0 1 ' + cx + ' ' + (cy+r) + ' Z" fill="' + CO + '"></path>'
+      + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + ink + '" stroke-width="4"></circle>'
+      + '<line x1="' + cx + '" y1="' + (cy-r) + '" x2="' + cx + '" y2="' + (cy+r) + '" stroke="' + ink + '" stroke-width="4"></line>';
+    const quarter = (cx, cy, r) => '<circle cx="' + (cx+5) + '" cy="' + (cy+5) + '" r="' + r + '" fill="' + ink + '"></circle>'
+      + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + CO + '"></circle>'
+      + '<path d="M' + cx + ' ' + cy + ' L' + cx + ' ' + (cy-r) + ' A' + r + ' ' + r + ' 0 0 0 ' + (cx-r) + ' ' + cy + ' Z" fill="' + US + '"></path>'
+      + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + ink + '" stroke-width="4"></circle>'
+      + '<path d="M' + (cx-r) + ' ' + cy + ' L' + cx + ' ' + cy + ' L' + cx + ' ' + (cy-r) + '" fill="none" stroke="' + ink + '" stroke-width="4"></path>';
+    const arrow = (x, y) => '<text x="' + (x+22) + '" y="' + (y-16) + '" text-anchor="middle" class="px" font-size="12" fill="' + ink + '">+ data</text>'
+      + '<path d="M' + x + ' ' + (y-4) + ' h30 v-9 l16 13 l-16 13 v-9 h-30 Z" fill="' + ink + '"></path>';
+    const t = (x, y, cls, size, txt) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" class="' + cls + '" font-size="' + size + '" fill="' + ink + '">' + txt + '</text>';
+    const cy = 160;
+    return '<svg class="fig" width="820" height="300" viewBox="0 0 820 300" role="img" aria-label="Author 1’s assumption, value creation: everyone gets more. With more data, a pie split evenly between company and users grows into a bigger pie, still split evenly. Author 2’s nuance, value capture: the company takes more. With more data, the pie grows but the company takes three quarters and users one quarter.">'
+      + t(200, 24, 'px', 15, 'Author 1’s Assumption') + t(200, 48, 'bd', 14, 'Value creation: everyone gets more')
+      + t(612, 24, 'px', 15, 'Author 2’s Nuance') + t(612, 48, 'bd', 14, 'Value capture: the company takes more')
+      + half(55, cy, 48) + arrow(132, cy) + half(278, cy, 80)
+      + '<line x1="408" y1="76" x2="408" y2="248" stroke="' + ink + '" stroke-width="3" stroke-dasharray="8 8"></line>'
+      + half(468, cy, 48) + arrow(538, cy) + quarter(722, cy, 80)
+      + '<rect x="300" y="266" width="22" height="22" fill="' + CO + '" stroke="' + ink + '" stroke-width="3"></rect><text x="332" y="284" class="bd" font-size="16" fill="' + ink + '">Company</text>'
+      + '<rect x="446" y="266" width="22" height="22" fill="' + US + '" stroke="' + ink + '" stroke-width="3"></rect><text x="478" y="284" class="bd" font-size="16" fill="' + ink + '">Users</text>'
+      + '</svg>';
+  }
+
+  function picksOf(k){ return picks[k] || []; }
+  function pickChip(k, letter){ return picksOf(k).indexOf(letter) >= 0 ? '<span class="chipx pick">' + CHECK + 'CLASS PICK</span>' : ''; }
+
+  const R = {
+    meet: s => '<div class="panel spanel pop"><img class="hero" src="' + FACE.hh + '" alt="Mr. Xu in his hoodie, smiling warmly"></div>'
+      + '<div class="tile abs" style="left:112px;top:166px"><div class="to n6"><div class="ti n6">' + icon('heart',8) + '<div class="t-l">FAMILY</div></div></div></div>'
+      + '<div class="tile abs" style="left:734px;top:166px"><div class="to n6"><div class="ti n6">' + icon('bowl',7) + '<div class="t-l">FOOD</div></div></div></div>'
+      + dbox(s),
+
+    speech: s => '<div class="panel spanel pop"><div class="art">' + ART[s.art]() + '</div></div>' + dbox(s),
+
+    startup: () => '<div class="panel fpanel center pop">'
+      + '<div style="font-weight:900;font-size:30px">Introducing…</div>'
+      + '<div class="h-xl">SOCIAL RESUME</div>'
+      + '<div class="h-title" style="margin:0">Friends. Dates. Dinner.</div>'
+      + '<div class="artrow" style="margin-top:10px">' + icon('people',7) + icon('heart',7) + icon('bowl',7) + '</div></div>',
+
+    an1pie: () => '<div class="panel fpanel pop" style="gap:20px">'
+      + '<div class="ptitle">ANALYSIS 1</div>'
+      + '<p class="lead" style="font-size:28px">Data can create value, but users don’t automatically get more of it.</p>'
+      + '<div style="flex:1;min-height:0;display:flex;align-items:center">' + piesSVG() + '</div>'
+      + '</div>' + tags([['ANALYSIS 1','t-coral']]),
+
+    title: () => '<div class="panel fpanel center pop">'
+      + '<div class="h-xl">LET’S PLAY!</div>'
+      + '<div class="divider" aria-hidden="true">' + icon('heart',3) + '<span class="dash"></span>' + icon('bowl',3) + '<span class="dash"></span>' + icon('heart',3) + '</div>'
+      + '<div><div class="h-sub">SOCIAL RESUME:</div><div class="h-title">The Intern Challenge</div></div>'
+      + '<button class="bigbtn" type="button" id="startBtn"><span class="bo n6"><span class="bi n6">START<span class="tri-r" style="border-left-width:14px;border-top-width:10px;border-bottom-width:10px"></span></span></span></button>'
+      + '</div><img class="peek" src="' + FACE.sh + '" alt="Mr. Xu, smiling">',
+
+    role: () => '<div class="panel fpanel pop" style="flex-direction:row;gap:36px;align-items:center;padding-top:44px">'
+      + '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:20px">'
+      + '<div class="ptitle">YOUR ROLE</div>'
+      + '<ul class="blist">'
+      + '<li>You are an intern consultant at A16ZYC Consultants</li>'
+      + '<li>We are your managers, deciding if you get a return offer</li>'
+      + '<li>Our client Mr. Xu needs your help launching his startup, Social Resume</li>'
+      + '</ul></div>'
+      + '<div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:12px">'
+      + '<div class="portrait" style="width:250px;height:280px"><img src="' + FACE.sh + '" alt="Mr. Xu, smiling" style="width:238px;height:300px"></div>'
+      + '<div class="chipx view" style="font-size:16px">MR. XU · OUR CLIENT</div></div>'
+      + '</div>' + tags([['WELCOME, INTERNS','t-coral']]),
+
+    structure: () => '<div class="panel fpanel pop" style="justify-content:center;gap:30px">'
+      + '<div class="ptitle">PRESENTATION STRUCTURE</div>'
+      + '<div class="grid2">'
+      + card('<div class="row"><span class="badge n4">1</span><span class="ck">CONCEPTS</span></div><div class="ct" style="font-size:25px">We’ll present major concepts from Clough &amp; Wu’s paper</div>')
+      + card('<div class="row"><span class="badge n4">2</span><span class="ck">DECISIONS</span></div><div class="ct" style="font-size:25px">After certain sections, you’ll make a decision as an intern class – to the Professor – that alters Social Resume’s launch</div>')
+      + '</div></div>' + tags([['HOW TODAY WORKS','t-coral']]),
+
+    papers: () => '<div class="panel fpanel pop" style="justify-content:center;gap:24px">'
+      + '<div class="ptitle">THE PAPERS</div>'
+      + '<p class="lead">Apply <span style="color:var(--coral)">Author 2’s</span> ideas to the questions</p>'
+      + '<div class="grid2">'
+      + card('<div class="ck">PAPER 1</div><div class="ct" style="font-size:28px">Gregory et al.</div><div class="chips"><span class="chipx no">“AUTHOR 1”</span></div>', 'soft')
+      + card('<div class="ck">PAPER 2</div><div class="ct" style="font-size:28px">Clough &amp; Wu</div><div class="chips"><span class="chipx view">“AUTHOR 2”</span><span class="chipx pick">APPLY THIS ONE</span></div>', 'hot')
+      + '</div></div>' + tags([['THE PAPERS','t-coral']]),
+
+    company: () => '<div class="panel fpanel pop" style="justify-content:center;gap:22px">'
+      + '<div class="ptitle">THE SOCIAL RESUME</div>'
+      + '<p class="lead">Social networking &amp; dating platform driven by AI – launching in NYC</p>'
+      + '<p class="sect">REVENUES FROM 3 TIERS OF SUBSCRIPTIONS:</p>'
+      + '<div class="grid3">'
+      + card('<div class="row">' + icon('people',3) + '</div><div class="ck" style="color:var(--coral);font-size:15px">SOCIALITES</div><div class="ct">Friend connections</div>')
+      + card('<div class="row">' + icon('heart',4) + '</div><div class="ck" style="color:var(--coral);font-size:15px">LOVEBIRDS</div><div class="ct">Dates</div>')
+      + card('<div class="row">' + icon('people',3) + icon('heart',4) + '</div><div class="ck" style="color:var(--coral);font-size:15px">CONNECTORS</div><div class="ct">Both types of connections</div>', 'hot')
+      + '</div><p class="cite" style="margin-top:0">Tiers run cheapest to most expensive, left to right.</p></div>' + tags([['THE CLIENT’S STARTUP','t-coral']]),
+
+    network: () => '<div class="panel fpanel pop" style="justify-content:center;align-items:center;text-align:center;gap:30px">'
+      + '<div class="ptitle">THE “NETWORK EFFECT”</div>'
+      + '<div class="row" style="gap:20px;align-items:flex-end" aria-hidden="true">' + icon('person',4) + '<span class="tri-r" style="color:var(--night)"></span>' + icon('people',4) + '<span class="tri-r" style="color:var(--night)"></span>' + icon('people',4) + icon('people',4) + icon('people',4) + '</div>'
+      + '<p class="lead" style="font-size:32px;max-width:720px">“where a service becomes more valuable to its users as more people use it”</p>'
+      + '<p class="cite" style="margin-top:0;font-size:18px">(HSB)</p></div>' + tags([['KEY TERM','t-coral']]),
+
+    q1: s => {
+      const q = Q[s.q];
+      const c = k => '<button class="choice" type="button" data-pick="' + k + '" aria-pressed="' + (picksOf(s.q).indexOf(k) >= 0) + '" aria-label="Option ' + k + ': ' + q.opts[k] + '">'
+        + '<span class="co n6"><span class="ci n6" style="min-height:118px"><span class="badge n4">' + k + '</span><span class="cname">' + q.opts[k] + '</span></span></span>'
+        + '<span class="flag n4">' + CHECK + 'CLASS PICK</span></button>';
+      return '<div class="panel spanel"></div>' + tags([['QUESTION 1','t-coral']])
+        + '<div class="qzone pop"><div class="cgrid2' + (picksOf(s.q).length ? ' has-pick' : '') + '" id="choices">' + c('A') + c('B') + c('C') + c('D') + '</div></div>' + dbox(s);
+    },
+
+    q1r: s => {
+      const q = Q[s.q];
+      const c = k => card('<div class="row"><span class="badge n4">' + k + '</span><span class="cname">' + q.opts[k] + '</span></div><div class="chips">' + (q.view.indexOf(k) >= 0 ? '<span class="chipx view">OUR ANSWER</span>' : '') + pickChip(s.q, k) + '</div>', q.view.indexOf(k) >= 0 ? 'hot' : 'soft');
+      return '<div class="panel fpanel pop" style="gap:22px">'
+        + '<div class="ptitle">MOST SIMILAR: UBER</div>'
+        + '<div class="grid2 tight" style="gap:14px 22px">' + c('A') + c('B') + c('C') + c('D') + '</div>'
+        + '<div class="strip n4" style="font-size:26px">Uber is a platform that relies on <span class="hl">geographic and personal data</span> to match riders with drivers – similar to the Social Resume’s <span class="hl">matching function.</span></div>'
+        + '</div>' + tags([['QUESTION 1 · REVEAL','t-mint']]);
+    },
+
+    q2: s => {
+      const q = Q[s.q];
+      const c = k => { const o = q.opts[k]; return '<button class="choice" type="button" data-pick="' + k + '" aria-pressed="' + (picksOf(s.q).indexOf(k) >= 0) + '" aria-label="Option ' + k + ': ' + o.head + '. ' + o.text + '">'
+        + '<span class="co n6"><span class="ci col n6" style="min-height:206px"><span class="ctop"><span class="badge n4">' + k + '</span><span class="chead">' + o.head + '</span><span class="cicon">' + icon(o.icon, 4) + '</span></span>'
+        + '<span class="ctext" style="font-size:25px">' + o.text + '</span></span></span>'
+        + '<span class="flag n4">' + CHECK + 'CLASS PICK</span></button>'; };
+      return '<div class="panel spanel"></div>' + tags([['QUESTION 2','t-coral']])
+        + '<div class="qzone pop"><div class="cgrid2' + (picksOf(s.q).length ? ' has-pick' : '') + '" id="choices">' + c('A') + c('B') + '</div></div>' + dbox(s);
+    },
+
+    dec: s => {
+      const q = Q[s.q];
+      const meter = (label, cls, w) => '<span class="vrow"><span class="vl">' + label + '</span><span class="vtrack"><span class="vfill ' + cls + '" style="width:' + w + '%"></span></span></span>';
+      const c = k => { const o = q.opts[k]; return '<button class="choice" type="button" data-pick="' + k + '" aria-pressed="' + (picksOf(s.q).indexOf(k) >= 0) + '" aria-label="Option ' + k + ': ' + o.head + '. ' + o.text + '">'
+        + '<span class="co n6"><span class="ci col n6" style="min-height:206px"><span class="ctop"><span class="badge n4">' + k + '</span><span class="chead">' + o.head + '</span>' + (o.icon ? '<span class="cicon">' + icon(o.icon, 4) + '</span>' : '') + '</span>'
+        + (o.viz ? '<span class="viz" aria-hidden="true">' + meter('USERS', 'f-users', o.viz[0]) + meter('AI LESSONS', 'f-learn', o.viz[1]) + '</span>' : '')
+        + '<span class="ctext" style="font-size:' + (o.viz ? 21 : 25) + 'px">' + o.text + '</span></span></span>'
+        + '<span class="flag n4">' + CHECK + 'CLASS PICK</span></button>'; };
+      return '<div class="panel spanel"></div>' + tags([[s.tag,'t-coral']])
+        + '<div class="qzone pop"><div class="cgrid2' + (picksOf(s.q).length ? ' has-pick' : '') + '" id="choices">' + c('A') + c('B') + '</div></div>' + dbox(s);
+    },
+
+    q5rOld: s => '<div class="panel fpanel pop" style="gap:16px">'
+      + '<div class="ptitle">AUTHOR 2’S VIEW</div>'
+      + '<div class="grid2 tight">'
+      + card('<div class="row"><span class="badge sm n4">A</span><span class="ck">START FROM SCRATCH</span>' + pickChip(s.q,'A') + '</div><div class="cs">Treats the AI’s learning as if it walked out the door with the users.</div>', 'soft')
+      + card('<div class="row"><span class="badge sm n4">B</span><span class="ck">KEEP THE LESSONS</span>' + pickChip(s.q,'B') + '</div><div class="cs">Separates the people, who can leave, from the data, which stays with the company.</div>', 'hot')
+      + '</div>'
+      + '<div class="row"><div class="itile n4">' + icon('people',4) + '</div><p class="body" style="font-size:22px"><b>The people left:</b> fewer opportunities to connect.</p></div>'
+      + '<div class="row"><div class="itile n4">' + icon('books',4) + '</div><p class="body" style="font-size:22px"><b>The lessons stayed:</b> our AI still has what it learned.</p></div>'
+      + '<p class="body" style="font-size:19px;color:var(--muted)">But fewer users can also mean less new data coming in.</p>'
+      + '<div class="strip n4">An old profile can teach our AI. <span class="hl">It can’t turn up for dinner.</span></div>'
+      + '</div>' + tags([['QUESTION 5 · REVEAL','t-mint']]),
+
+    lesson: () => {
+      const a = picksOf('q6')[0], b = picksOf('q6b')[0];
+      const chips = (a || b) ? '<div class="chips">' + (a ? '<span class="chipx pick">BEFORE THE TWIST: CLASS PICKED ' + a + '</span>' : '') + (b ? '<span class="chipx pick">AFTER THE TWIST: CLASS PICKED ' + b + '</span>' : '') + '</div>' : '';
+      return '<div class="panel fpanel pop" style="gap:18px">'
+        + '<div class="ptitle">IT DEPENDS ON THE BOTTLENECK</div>' + chips
+        + '<p class="lead">Good recommendations need people available to connect.</p>'
+        + '<div class="grid2">'
+        + card('<div class="row">' + icon('people',3) + '<span class="ck">PARTICIPATION IS THE PROBLEM</span></div><div class="ct" style="font-size:26px">Build the network.</div><div class="cs">A · Get big fast</div>')
+        + card('<div class="row">' + icon('books',3) + '<span class="ck">LEARNING IS THE PROBLEM</span></div><div class="ct" style="font-size:26px">Run useful experiments.</div><div class="cs">B · Learning over growth</div>')
+        + '</div>'
+        + '<p class="cite">Clough &amp; Wu, 2022, p. 187.</p>'
+        + '</div>' + tags([['QUESTION 6 · LESSON','t-mint']]);
+    },
+
+    steps: s => {
+      const q = Q[s.q];
+      const c = k => '<button class="choice" type="button" data-pick="' + k + '" aria-pressed="' + (picksOf(s.q).indexOf(k) >= 0) + '" aria-label="Option ' + k + ': ' + esc(q.opts[k].join(', ')) + '">'
+        + '<span class="co n6"><span class="ci col n6" style="padding:12px 14px;gap:8px"><span class="ctop"><span class="badge sm n4">' + k + '</span><span class="chead" style="font-size:12px">' + q.opts[k].length + ' STEPS</span></span>'
+        + '<ol class="steplist">' + q.opts[k].map(t => '<li>' + t + '</li>').join('') + '</ol></span></span>'
+        + '<span class="flag n4">' + CHECK + 'CLASS PICK</span></button>';
+      return '<div class="panel spanel"></div>' + tags([[s.tag,'t-coral']])
+        + '<div class="qzone pop" style="top:112px;height:330px;justify-content:flex-start"><div class="grid3' + (picksOf(s.q).length ? ' has-pick' : '') + '" id="choices" style="gap:18px;align-items:stretch">' + c('A') + c('B') + c('C') + '</div></div>' + dbox(s);
+    },
+
+    q5r: s => {
+      const q = Q[s.q];
+      const c = (k, wide) => { const on = q.view.indexOf(k) >= 0; return card('<div class="row" style="gap:12px;flex-wrap:wrap"><span class="badge sm n4">' + k + '</span><span class="chipx ' + (on ? 'view' : 'no') + '">' + (on ? 'BEST FIT' : 'DOESN’T FIT MR. XU’S PLAN') + '</span>' + pickChip(s.q, k) + '</div>'
+        + '<div class="cs" style="font-size:' + (wide ? 19 : 17) + 'px;font-weight:700">' + q.why[k] + '</div>', on ? 'hot' : 'soft'); };
+      return '<div class="panel fpanel pop" style="padding:46px 36px 22px;gap:16px">'
+        + '<div class="ptitle" style="font-size:20px">BEST FIT FOR MR. XU’S PLAN: C</div>'
+        + '<div class="tight">' + c('C', true) + '</div>'
+        + '<div class="grid2 tight" style="gap:16px 18px">' + c('A') + c('B') + '</div>'
+        + '</div>' + tags([['QUESTION 5 · REVEAL','t-mint']]);
+    },
+
+    q2r: s => '<div class="panel spanel" style="padding:44px 40px 0;display:flex;flex-direction:column;gap:18px">'
+      + '<div class="ptitle" style="font-size:19px;text-align:center">NEITHER IS WRONG. THEY’RE THE TWO AUTHORS’ ARGUMENTS.</div>'
+      + '<div class="grid2">'
+      + card('<div class="row"><span class="badge sm n4">A</span><span class="ck">AUTHOR 1</span>' + pickChip(s.q,'A') + '</div><div class="cs">Users and data grow together: more people, more data, more value for users. That’s their <b>“data network effect.”</b></div>')
+      + card('<div class="row"><span class="badge sm n4">B</span><span class="ck">AUTHOR 2</span>' + pickChip(s.q,'B') + '</div><div class="cs">Data and users are separate: a company can get data before it has any users. And more data doesn’t automatically mean users feel they get more value.</div>')
+      + '</div></div>' + tags([['QUESTION 2 · REVEAL','t-mint']]) + dbox(s),
+
+    theory1: () => '<div class="panel fpanel pop" style="gap:20px">'
+      + '<div class="ptitle">AUTHOR 1’S THEORY</div>'
+      + '<p class="body" style="font-size:24px">AI and this priority to harvest more data create this network effect (called the <b>“data network effect”</b>), suggesting that users of a platform believe they get more value the more data the platform collects from higher platform usage.</p>'
+      + '<div class="arrows">'
+      + '<div class="arr">' + upArrow(140, 210, '#c85745') + '<span>User’s perceived value</span></div>'
+      + '<div class="arr">' + upArrow(140, 210, '#00c49c') + '<span>Data that the platform gets</span></div>'
+      + '</div></div>' + tags([['AUTHOR 1 · GREGORY ET AL.','t-coral']]),
+
+    theory2: () => '<div class="panel fpanel pop" style="gap:20px">'
+      + '<div class="ptitle">AUTHOR 2 ADDS NUANCE</div>'
+      + '<p class="body" style="font-size:24px">Author 2 doesn’t disagree but adds nuance: More usage of a platform might generate more data, but this doesn’t mean that there is a <b>“data network effect”</b> that makes users believe they get more value from the platform.</p>'
+      + '<div class="arrows">'
+      + '<div class="arr">' + upArrow(110, 160, '#00c49c') + '<span>Data that the platform gets</span></div>'
+      + '<div class="arr"><div class="row" style="gap:16px;align-items:center">' + upArrow(64, 110, '#c85745') + upArrow(64, 110, '#c85745', true) + '</div><span>User’s perceived value: up <i>or</i> down</span></div>'
+      + '</div>'
+      + '</div>' + tags([['AUTHOR 2 · CLOUGH & WU','t-coral']]),
+
+    q3: s => {
+      const q = Q[s.q];
+      const c = k => '<button class="choice" type="button" data-pick="' + k + '" aria-pressed="' + (picksOf(s.q).indexOf(k) >= 0) + '" aria-label="Option ' + k + ': ' + esc(q.opts[k]) + '">'
+        + '<span class="co n6"><span class="ci n6"><span class="badge sm n4">' + k + '</span><span class="ctext" style="font-size:19px">' + q.opts[k] + '</span></span></span>'
+        + '<span class="flag n4">' + CHECK + 'CLASS PICK</span></button>';
+      return '<div class="panel fpanel pop" style="padding:46px 40px 22px;gap:16px">'
+        + '<p class="lead" style="font-size:22px">' + q.ask + '</p>'
+        + '<div class="crows' + (picksOf(s.q).length ? ' has-pick' : '') + '" id="choices">' + c('A') + c('B') + c('C') + c('D') + '</div>'
+        + '</div>' + tags([['QUESTION 3','t-coral'],['SELECT ALL THAT APPLY','t-yellow']]);
+    },
+
+    q3r: s => {
+      const q = Q[s.q];
+      const c = k => { const on = q.view.indexOf(k) >= 0; return card('<div class="row" style="gap:14px;align-items:flex-start"><span class="badge sm n4">' + k + '</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px"><div class="cs" style="font-size:18px">' + q.opts[k] + '</div><div class="chips">' + (on ? '<span class="chipx view">THE AUTHORS’ VIEW</span>' : '') + pickChip(s.q, k) + '</div></div></div>', on ? 'hot' : 'soft'); };
+      return '<div class="panel fpanel pop" style="padding:46px 40px 22px;gap:12px">'
+        + '<div class="ptitle" style="font-size:20px">HOW THE AUTHORS SEE IT: A AND C</div>'
+        + '<div class="tight" style="display:flex;flex-direction:column;gap:9px">' + c('A') + c('B') + c('C') + c('D') + '</div>'
+        + '</div>' + tags([['QUESTION 3 · REVEAL','t-mint']]);
+    },
+
+    q3why: () => '<div class="panel fpanel pop" style="gap:22px">'
+      + '<div class="ptitle">WHY A AND C?</div>'
+      + '<p class="lead" style="font-size:24px">This demonstrates that:</p>'
+      + '<div style="display:flex;flex-direction:column;gap:16px">'
+      + '<div class="row" style="align-items:flex-start"><span class="badge sm n4">1</span><p class="body" style="font-size:23px">The authors are <b>not completely disagreeing</b> in the papers.</p></div>'
+      + '<div class="row" style="align-items:flex-start"><span class="badge sm n4">2</span><p class="body" style="font-size:23px">This scenario is about <b>if the data is meaningful</b>, not if there is a data network effect.</p></div>'
+      + '<div class="row" style="align-items:flex-start"><span class="badge sm n4">3</span><p class="body" style="font-size:23px">A bad match still comes from increased user usage, which may cause a short-term bad effect, but <b>if Social Resume meaningfully analyzes what went wrong</b> so future matches are better, users get more value.</p></div>'
+      + '</div></div>' + tags([['QUESTION 3 · REVEAL','t-mint']]),
+
+    venn: () => '<div class="panel fpanel pop" style="gap:12px;align-items:center;padding-top:42px">'
+      + '<div class="ptitle" style="text-align:center;font-size:21px">THE FIRM CONTROLS THE DATA, NOT THE USERS</div>'
+      + vennSVG()
+      + '<div class="strip n4" style="font-size:28px;text-align:center;align-self:stretch">Users can leave. <span class="hl">Data stays.</span></div>'
+      + '</div>' + tags([['AUTHOR 2’S MAIN POINT','t-coral']]),
+
+    two: () => '<div class="panel fpanel pop" style="justify-content:center;gap:30px">'
+      + '<div class="ptitle">TWO ANALYSES SUPPORT THIS</div>'
+      + '<div class="grid2">'
+      + card('<div class="row"><span class="badge n4">1</span><span class="ck">ANALYSIS 1</span></div><div class="ct" style="font-size:30px">More data ≠ more value for users</div>')
+      + card('<div class="row"><span class="badge n4">2</span><span class="ck">ANALYSIS 2</span></div><div class="ct" style="font-size:30px">Data-driven learning ≠ a network effect</div>')
+      + '</div></div>' + tags([['AUTHOR 2’S MAIN POINT','t-coral']]),
+
+    an1: () => '<div class="panel fpanel pop" style="justify-content:center;gap:30px">'
+      + '<div class="ptitle">ANALYSIS 1 · TWO EXAMPLES</div>'
+      + '<p class="lead" style="font-size:28px">How data can benefit a platform:</p>'
+      + '<div class="grid2">'
+      + card('<div class="row">' + icon('coin',4) + '<div class="ct">User-level price discrimination</div></div>')
+      + card('<div class="row">' + icon('company',4) + '<div class="ct">Value capture at the expense of value creation</div></div>')
+      + '</div></div>' + tags([['ANALYSIS 1','t-coral']]),
+
+    price: () => '<div class="panel fpanel pop" style="justify-content:center;gap:26px">'
+      + '<div class="ptitle">DIFFERENT USERS, DIFFERENT PRICES</div>'
+      + '<div class="grid2">'
+      + card('<div class="row">' + icon('person',5) + '<span class="ck">WHO YOU ARE</span></div><div class="ct" style="font-size:26px">Logins, cookies, device IDs</div>')
+      + card('<div class="row">' + icon('coin',4) + '<span class="ck">WHAT YOU’LL PAY</span></div><div class="ct" style="font-size:26px">Browsing history, past purchases</div>')
+      + '</div>'
+      + '<div class="strip n4"><span class="hl">Example:</span> In 2012, Staples’ website charged $14.29 or $15.79 for the same stapler, depending on where you lived.</div>'
+      + '</div>' + tags([['ANALYSIS 1 · EXAMPLE 1','t-coral']]),
+
+    capture: () => '<div class="panel fpanel pop" style="gap:18px">'
+      + '<div class="ptitle">THE PLATFORM EARNS MORE. USERS GET LESS.</div>'
+      + '<div style="display:flex;flex-direction:column;gap:14px">'
+      + card('<div class="row"><div class="itile n4">' + icon('coin',3) + '</div><div><div class="ck">ADS</div><div class="ct">More ads mean more revenue but annoyed users, and some leave.</div></div></div>')
+      + card('<div class="row"><div class="itile n4">' + icon('heart',3) + '</div><div><div class="ck">BATTLEFRONT II (2017)</div><div class="ct">$80 game, about 40 hours to unlock Darth Vader unless you paid more. Backlash forced EA to cut costs by 75%.</div></div></div>')
+      + '</div></div>' + tags([['ANALYSIS 1 · EXAMPLE 2','t-coral']]),
+
+    q4: s => {
+      const q = Q[s.q];
+      const c = k => '<button class="choice" type="button" data-pick="' + k + '" aria-pressed="' + (picksOf(s.q).indexOf(k) >= 0) + '" aria-label="Option ' + k + ': ' + esc(q.opts[k]) + '">'
+        + '<span class="co n6"><span class="ci n6"><span class="badge sm n4">' + k + '</span><span class="ctext" style="font-size:19px">' + q.opts[k] + '</span></span></span>'
+        + '<span class="flag n4">' + CHECK + 'CLASS PICK</span></button>';
+      return '<div class="panel spanel"></div>' + tags([['QUESTION 4','t-coral'],['SELECT ALL THAT APPLY','t-yellow']])
+        + '<div class="qzone pop" style="top:118px;height:322px"><div class="crows' + (picksOf(s.q).length ? ' has-pick' : '') + '" id="choices" style="gap:10px">' + c('A') + c('B') + c('C') + c('D') + '</div></div>' + dbox(s);
+    },
+
+    q4r: s => {
+      const q = Q[s.q];
+      const c = k => { const on = q.view.indexOf(k) >= 0; return card('<div class="row" style="gap:12px"><span class="badge sm n4">' + k + '</span><span class="chipx ' + (on ? 'view' : 'no') + '">' + (on ? 'AUTHOR 2 AGREES' : 'AUTHOR 2 WOULDN’T SAY THIS') + '</span>' + pickChip(s.q, k) + '</div>'
+        + '<div class="cs" style="font-size:17px;font-weight:800">' + q.opts[k] + '</div><div class="cs" style="font-size:17px;font-weight:600">' + q.why[k] + '</div>', on ? 'hot' : 'soft'); };
+      return '<div class="panel fpanel pop" style="padding:46px 36px 22px;gap:14px">'
+        + '<div class="ptitle" style="font-size:20px">AUTHOR 2’S VIEW: B AND C</div>'
+        + '<div class="grid2 tight" style="gap:14px 18px">' + c('B') + c('C') + c('A') + c('D') + '</div>'
+        + '</div>' + tags([['QUESTION 4 · REVEAL','t-mint']]);
+    },
+
+    an2: () => '<div class="panel fpanel pop" style="justify-content:center;gap:30px">'
+      + '<div class="ptitle">ANALYSIS 2</div>'
+      + '<p class="lead" style="font-size:34px;line-height:1.3">Platforms that practice <span style="color:var(--coral)">“data-driven learning”</span> do not necessarily experience a <span style="color:var(--coral)">“network effect,”</span> so the “data network effect” isn’t accurate.</p>'
+      + '</div>' + tags([['ANALYSIS 2','t-coral']]),
+
+    path: () => '<div class="panel fpanel pop" style="gap:18px">'
+      + '<div class="ptitle" style="font-size:21px">DATA-DRIVEN LEARNING: PATH DEPENDENCE</div>'
+      + '<div class="grid2" style="flex:1;min-height:0">'
+      + card('<div class="row">' + icon('people',3) + '<span class="ck">NETWORK EFFECTS · THE PRESENT</span></div>'
+        + '<div class="cs" style="font-size:20px">Network effects depend on users’ belief that there are other users on a platform to join to capture that value.</div>'
+        + '<div class="cs" style="font-size:20px">There is a <b>“threshold”</b> of how many users should be on a platform to encourage users to join, creating that network effect.</div>')
+      + card('<div class="row">' + icon('books',3) + '<span class="ck">DATA-DRIVEN LEARNING · THE HISTORY</span></div>'
+        + '<div class="cs" style="font-size:20px">Unlike network effects, data-driven learning depends on the <b>history – not present –</b> of how much data is accumulated and insights can be made to derive value, and there is <b>no proof of a “threshold”</b> that generates more value for users.</div>', 'hot')
+      + '</div></div>' + tags([['ANALYSIS 2 · REASON 1','t-coral']]),
+
+    trade: () => '<div class="panel fpanel pop" style="gap:18px">'
+      + '<div class="ptitle">DATA’S TRADABILITY</div>'
+      + '<div class="grid2">'
+      + card('<div class="row">' + icon('people',3) + '<span class="ck">USERS</span></div><div class="cs" style="font-size:21px">Users dropping below a certain threshold destroys the network effect. Once users leave, the firm cannot physically control the users to return.</div>')
+      + card('<div class="row">' + icon('books',3) + '<span class="ck">DATA</span></div><div class="cs" style="font-size:21px">With data-driven learning, once data is collected, <b>the firm has it.</b></div>', 'hot')
+      + '</div>'
+      + '<div class="strip n4" style="font-size:23px">This difference in <span class="hl">autonomy</span> questions whether data can cause this network effect as people on a platform can, to justify the <span class="hl">“data network effect”</span> concept.</div>'
+      + '</div>' + tags([['ANALYSIS 2 · REASON 2','t-coral']]),
+
+    live: s => '<div class="panel fpanel center pop" style="flex-direction:row;gap:46px">'
+      + '<img class="bigface" src="' + FACE.st + '" alt="Mr. Xu, thinking">'
+      + '<div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start;text-align:left">'
+      + '<div class="ptitle" style="font-size:34px">' + s.title + '</div>'
+      + '<p class="lead" style="font-size:30px;max-width:420px">Your managers will take it from here.</p>'
+      + '</div></div>' + tags([['OVER TO US','t-night']]),
+
+    strategy: () => '<div class="panel fpanel pop" style="gap:16px">'
+      + '<div class="ptitle">STRATEGIC IMPLICATIONS</div>'
+      + '<p class="body" style="font-size:21px">Ultimately this question of whether data can create this network effect creates two strategic implications:</p>'
+      + '<div class="grid2">'
+      + card('<div class="row"><span class="badge sm n4">1</span><span class="ck" style="color:var(--coral)">“GET BIG FAST”</span></div><div class="cs">If a manager thinks network effects lead to competitive advantage in a market, the goal should be to “get big fast” – more people, more value that users perceive.</div>')
+      + card('<div class="row"><span class="badge sm n4">2</span><span class="ck" style="color:var(--coral)">SCALE SLOWER TO LEARN</span></div><div class="cs">If a manager thinks data-driven learning leads to competitive advantage, the goal should be to scale slower to learn about their users and gather this data.</div>')
+      + '</div>'
+      + '<div class="strip n4" style="font-size:20px">The term <span class="hl">“data network effects”</span> merges managers’ different priorities regarding network effects and data-driven learning into one concept, despite requiring <span class="hl">opposite strategies</span> to acquire competitive advantage.</div>'
+      + '</div>' + tags([['STRATEGY','t-coral']])
+  };
+
+  const NEXT = { title:null, q1:'Reveal', q2:'Reveal', q3:'Reveal', q4:'Reveal', steps:'Reveal' };
+
+  // ---------------- state ----------------
+  let i = 0, p = 0, picks = {};
+  let typing = null, spans = [];
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = id => document.getElementById(id);
+  const sceneEl = $('scene'), stage = $('stage');
+
+  function render(instant){
+    const s = S[i];
+    sceneEl.innerHTML = R[s.t](s);
+    $('chip').textContent = (i + 1) + ' / ' + S.length + ' · ' + s.sec;
+    const curQ = s.q ? QORDER.indexOf(qpip(s.q)) : -1;
+    const lastQ = (() => { let n = -1; for (let k = 0; k <= i; k++) if (S[k].q) n = QORDER.indexOf(qpip(S[k].q)); return n; })();
+    $('pips').innerHTML = QORDER.map((k, n) => '<span class="pip n4' + (n < lastQ || (n === lastQ && (curQ !== n || /r$|why$/.test(s.t))) ? ' on' : '') + '"></span>').join('');
+    renderNotes(s);
+    wireScene(s);
+    if (s.pages) { p = Math.min(p, s.pages.length - 1); renderPage(instant); }
+    updateNav();
+  }
+
+  function renderNotes(s){
+    $('notesSlide').textContent = 'SLIDE ' + s.slide;
+    $('notesBody').innerHTML = s.notes.map(n => (n[0] ? '<p class="lab">' + n[0] + '</p>' : '') + '<p>' + esc(n[1]) + '</p>').join('');
+    $('notesBody').scrollTop = 0;
+  }
+
+  function wireScene(s){
+    const sb = $('startBtn'); if (sb) sb.addEventListener('click', next);
+    const db = $('dbox'); if (db) db.addEventListener('click', next);
+    const ch = $('choices');
+    if (ch) ch.querySelectorAll('.choice').forEach(b => b.addEventListener('click', () => pick(b.dataset.pick)));
+  }
+
+  function pick(k){
+    const s = S[i]; if (!s.q || /r$|why$/.test(s.t)) return;
+    const q = Q[s.q]; const keys = Object.keys(q.opts); if (keys.indexOf(k) < 0) return;
+    let cur = picksOf(s.q).slice();
+    if (q.multi) { const at = cur.indexOf(k); if (at >= 0) cur.splice(at, 1); else cur.push(k); cur.sort(); }
+    else cur = (cur[0] === k) ? [] : [k];
+    picks[s.q] = cur;
+    const ch = $('choices');
+    ch.classList.toggle('has-pick', cur.length > 0);
+    ch.querySelectorAll('.choice').forEach(b => b.setAttribute('aria-pressed', String(cur.indexOf(b.dataset.pick) >= 0)));
+    updateNav();
+  }
+
+  function renderPage(instant){
+    const s = S[i], page = s.pages[p], d = $('dtext');
+    const len = page.join(' ').replace(/\*/g, '').length;
+    d.style.fontSize = (!s.face ? (len > 120 ? 28 : len > 80 ? 31 : 34) : len > 150 ? 24 : len > 105 ? 27 : 31) + 'px';
+    d.innerHTML = ''; spans = [];
+    page.forEach(par => {
+      const el = document.createElement('p');
+      par.split('*').forEach((t, k) => {
+        if (!t) return;
+        const sp = document.createElement('span');
+        if (k % 2) sp.className = 'hl';
+        el.appendChild(sp); spans.push([sp, t]);
+      });
+      d.appendChild(el);
+    });
+    $('cue').classList.remove('on');
+    stopTyping();
+    if (instant || reduced) { fillAll(); return; }
+    let shown = 0; const total = spans.reduce((a, x) => a + x[1].length, 0);
+    typing = setInterval(() => {
+      shown += 2; let left = shown;
+      spans.forEach(([sp, t]) => { const n = Math.max(0, Math.min(t.length, left)); sp.textContent = t.slice(0, n); left -= t.length; });
+      if (shown >= total) fillAll();
+    }, 22);
+  }
+  function stopTyping(){ if (typing) { clearInterval(typing); typing = null; } }
+  function fillAll(){
+    stopTyping();
+    spans.forEach(([sp, t]) => { sp.textContent = t; });
+    const c = $('cue'); if (c) c.classList.add('on');
+    updateNav();
+  }
+
+  function updateNav(){
+    const s = S[i];
+    $('backBtn').classList.toggle('vis-hide', i === 0 && p === 0);
+    let label = s.nx !== undefined ? s.nx : (NEXT[s.t] !== undefined ? NEXT[s.t] : 'Continue');
+    if (s.pages && p < s.pages.length - 1) label = 'Continue';
+    const nb = $('nextBtn');
+    nb.hidden = !label;
+    if (label) { $('nextLabel').textContent = label; nb.className = 'btn n4 ' + (label === 'Reveal' ? 'reveal' : 'go'); }
+    let hint = '';
+    if (s.q && !/r$|why$/.test(s.t)) {
+      const cur = picksOf(s.q);
+      hint = cur.length ? 'Class picked ' + cur.join(', ') : (Q[s.q].multi ? 'Hands up: select all that apply' : 'Hands up: which one?');
+    }
+    $('hint').textContent = hint;
+  }
+
+  function next(){
+    const s = S[i];
+    if (typing) { fillAll(); return; }
+    if (s.pages && p < s.pages.length - 1) { p++; renderPage(); updateNav(); return; }
+    if (i < S.length - 1) { i++; p = 0; render(); }
+    else { i = 0; p = 0; picks = {}; render(); }
+  }
+  function back(){
+    const s = S[i];
+    if (typing) stopTyping();
+    if (s.pages && p > 0) { p--; renderPage(true); updateNav(); return; }
+    if (i > 0) { i--; const t = S[i]; p = t.pages ? t.pages.length - 1 : 0; render(true); }
+  }
+
+  // ---------------- chrome ----------------
+  $('nextBtn').addEventListener('click', next);
+  $('backBtn').addEventListener('click', back);
+  $('notesBtn').addEventListener('click', toggleNotes);
+  $('fsBtn').addEventListener('click', toggleFs);
+  function toggleNotes(){
+    const n = $('notes'); n.hidden = !n.hidden;
+    $('notesBtn').setAttribute('aria-expanded', String(!n.hidden));
+    $('notesBtn').textContent = n.hidden ? 'Notes' : 'Hide notes';
+  }
+  function toggleFs(){
+    const app = $('app');
+    try {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else if (app.requestFullscreen) app.requestFullscreen().catch(() => {});
+    } catch (e) {}
+  }
+  document.addEventListener('fullscreenchange', () => { $('fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; fit(); });
+
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const onButton = e.target && e.target.tagName === 'BUTTON';
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || ((k === ' ' || k === 'Enter') && !onButton)) { e.preventDefault(); next(); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); back(); }
+    else if (/^[a-dA-D]$/.test(k)) pick(k.toUpperCase());
+    else if (k === 'f' || k === 'F') toggleFs();
+    else if (k === 'n' || k === 'N') toggleNotes();
+  });
+
+  function fit(){
+    const vp = $('vp');
+    const sc = Math.min(vp.clientWidth / 1024, vp.clientHeight / 768);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + sc + ')';
+  }
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe($('vp'));
+
+  function start(data){
+    if (data && typeof data.i === 'number') {
+      i = Math.min(Math.max(0, data.i), S.length - 1);
+      const raw = data.picks || {}; picks = {};
+      Object.keys(raw).forEach(k => { if (Array.isArray(raw[k])) picks[k] = raw[k]; });
+    }
+    if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ v: 2, i: i, picks: picks }));
+    fit();
+    render(true);
+  }
+  function boot(data){ start(data && data.v === 2 ? data : {}); }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);
+  else boot((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
+
+</body>
+</html>
