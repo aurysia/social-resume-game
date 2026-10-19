@@ -452,7 +452,7 @@ body{height:100%;background:var(--page);color:var(--cream);font-family:var(--f-b
   const ART = {
     loves: () => '<div class="artrow">' + tile('heart','LOVE',8) + '<div class="plus" aria-hidden="true">+</div>' + tile('bowl','FOOD',7) + '</div>',
     idea: () => '<div class="artrow">' + tile('books','INTERESTS',6,'sm') + '<div class="plus" aria-hidden="true">+</div>' + tile('people','PEOPLE',6,'sm') + '<div class="plus" aria-hidden="true">+</div>' + tile('bowl','MEALS',6,'sm') + '</div>',
-    offer: () => '<div class="stamp">RETURN OFFER!</div><div class="crew">' + icon('person',8) + icon('person',9) + icon('person',8) + icon('person',9) + icon('person',8) + '</div><div class="t-l" style="color:var(--night)">THE WHOLE INTERN CLASS</div>',
+    offer: () => '<div class="stamp">RETURN OFFER!</div><div class="crew">' + icon('person',8) + icon('person',9) + icon('person',8) + icon('person',9) + icon('person',8) + '</div>',
     hired: () => '<div class="stamp">YOU’RE HIRED!</div><div class="crew">' + icon('person',8) + icon('person',9) + icon('person',8) + '</div><div class="t-l" style="color:var(--night)">INTERN CONSULTANTS</div>'
   };
 
@@ -859,7 +859,7 @@ body{height:100%;background:var(--page);color:var(--cream);font-family:var(--f-b
     const q = Q[s.q]; const keys = Object.keys(q.opts); if (keys.indexOf(k) < 0) return;
     let cur = picksOf(s.q).slice();
     if (q.multi) { const at = cur.indexOf(k); if (at >= 0) cur.splice(at, 1); else cur.push(k); cur.sort(); }
-    else cur = (cur[0] === k) ? [] : [k];
+    else cur = [k];
     picks[s.q] = cur;
     const ch = $('choices');
     ch.classList.toggle('has-pick', cur.length > 0);
